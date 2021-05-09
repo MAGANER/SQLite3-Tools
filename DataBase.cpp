@@ -91,6 +91,19 @@ int DataBase::get_request_callback(void* data, int argc, char** argv, char** azC
 	
 	return 0;
 }
+map<string, SQLtype*> DataBase::run_get_request(const string& request, const function<bool(SQLtype*)>& predicat)
+{
+	map<string, SQLtype*>* data = new map<string, SQLtype*>();
+	char* error_message = nullptr;
+	int ok = sqlite3_exec(db, request.c_str(), DataBase::get_request_callback, (void*)data, &error_message);
+
+	if (error_message != nullptr)
+		this->error_message = error_message;
+
+	auto _data = *data;
+	return Functools::filter(_data, predicat);
+}
+
 
 string SQLite3DataBaseTools::make_create_request(const map<string, SQLtype*>& data, const string& table_name)
 {
