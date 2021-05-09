@@ -25,19 +25,22 @@ namespace Functools
 	}
 
 #ifdef MAP_FUNCTOOLS
-	template<class T1,class T2, class F>
-	std::map<T1, T2> map(const std::map<T1, T2>& hash_table, std::function<F>& lambda)
+	namespace MapFP
 	{
-		//map function for hash tables
-
-		std::map<T1, T2> new_map;
-		for(auto beg = hash_table.begin();beg!=hash_table.end();++beg)
+		template<class T1, class T2, class F>
+		std::map<T1, T2> map(const std::map<T1, T2>& hash_table, std::function<F>& lambda)
 		{
-			auto result = lambda(beg->second);
-			new_map[beg->first] = result;
+			//map function for hash tables
+
+			std::map<T1, T2> new_map;
+			for (auto beg = hash_table.begin(); beg != hash_table.end(); ++beg)
+			{
+				auto result = lambda(beg->second);
+				new_map[beg->first] = result;
+			}
+			return new_map;
 		}
-		return new_map;
-	}
+	};
 #endif
 	template<class T, class F>
 	T filter(const T& seq, const std::function<bool(F)>& predicat)
@@ -53,18 +56,21 @@ namespace Functools
 	}
 
 #ifdef MAP_FUNCTOOLS	
-	template<class T1, class T2, class F>
-	std::map<T1, T2> filter(const std::map<T1, T2>& hash_table, std::function<bool(F)>& predicat)
+	namespace MapFP
 	{
-		//filter function for hash tables
-
-		std::map<T1, T2> new_map;
-		for (auto beg = hash_table.begin(); beg != hash_table.end(); ++beg)
+		template<class T1, class T2, class F>
+		std::map<T1, T2> filter(const std::map<T1, T2>& hash_table, std::function<bool(F)>& predicat)
 		{
-			if (predicat(beg->second))new_map[beg->first] = beg->second;
+			//filter function for hash tables
+
+			std::map<T1, T2> new_map;
+			for (auto beg = hash_table.begin(); beg != hash_table.end(); ++beg)
+			{
+				if (predicat(beg->second))new_map[beg->first] = beg->second;
+			}
+			return new_map;
 		}
-		return new_map;
-	}
+	};
 #endif
 
 	template<class T, class F, class A>

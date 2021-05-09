@@ -167,3 +167,18 @@ string SQLite3DataBaseTools::make_select_request(const string& table_name)
 {
 	return "SELECT * FROM " + table_name;
 }
+string SQLite3DataBaseTools::make_select_request(const string& table_name,
+												 const vector<string>& fields)
+{
+	string request = "SELECT ";
+
+	auto counter = 0;
+	for (auto& f : fields)
+	{
+		request += f+" ";
+		if (counter + 1 != fields.size()) request += ",";
+		++counter;
+	}
+	request += "FROM " + table_name;
+	return request;
+}

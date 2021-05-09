@@ -1,6 +1,7 @@
 #pragma once
 #include<sqlite3.h>
 #include<map>
+#include<vector>
 #define MAP_FUNCTOOLS
 #include"Types.h"
 namespace SQLite3DataBaseTools
@@ -33,5 +34,7 @@ private:
 extern string make_create_request(const map<string, SQLtype*>& data, const string& table_name);
 extern string make_insert_request(const map<string, SQLtype*>& data, const string& table_name);
 extern string make_select_request(const string& table_name);
+extern string make_select_request(const string& table_name,
+								  const vector<string>& fields);
 };
 
