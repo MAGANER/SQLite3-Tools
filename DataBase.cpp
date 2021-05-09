@@ -19,15 +19,77 @@ string DataBase::get_error_message()
 {
 	return error_message;
 }
-bool DataBase::run_request(const string& request)
+bool DataBase::run_set_request(const string& request)
 {
+	//run create/insert request
+
 	char* error_message = nullptr;
 	int result = sqlite3_exec(db, request.c_str(), NULL, NULL, &error_message);
 	
 	if (error_message != nullptr)
 		this->error_message = error_message;
-
+	
 	return result == SQLITE_OK;
+}
+map<string, SQLtype*> DataBase::run_get_request(const string& request)
+{
+	map<string, SQLtype*>* data = new map<string, SQLtype*>();
+	char* error_message = nullptr;
+	int ok = sqlite3_exec(db, request.c_str(), DataBase::get_request_callback, (void*)data, &error_message);
+
+	if (error_message != nullptr)
+		this->error_message = error_message;
+	return *data;
+}
+int DataBase::get_request_callback(void* data, int argc, char** argv, char** azColName)
+{
+	map<string, SQLtype*> extracted_data;
+
+	for (int i = 0; i < argc; ++i)
+	{
+		function<char(char)> to_lower = tolower;
+		string name = Functools::map(string(azColName[i]), to_lower);
+		if (name == "id")
+		{
+			int id_val = argv[i] ? atoi(argv[i]) : 0;
+			extracted_data[string(azColName[i])] = new PrimaryKey(id_val);
+		}
+		else
+		{
+			string val = argv[i] ? argv[i] : "NULL";
+			if (val != "NULL")
+			{
+				SQL_TYPES data_type = get_string_value_real_type(val);
+				switch (data_type)
+				{
+				case SQL_TYPES::INTEGER:
+					extracted_data[azColName[i]] = new Integer(atoi(argv[i]));
+				break;
+				case SQL_TYPES::REAL:
+					extracted_data[azColName[i]] = new Real(atof(argv[i]));
+				break;
+				case SQL_TYPES::BOOLEAN:
+				{
+					bool val = string(argv[i]) == "true" ? true : false;
+					extracted_data[azColName[i]] = new Boolean(val);
+				}
+				break;
+				case SQL_TYPES::TEXT:
+					extracted_data[azColName[i]] = new Text(string(argv[i]));
+				break;
+				}
+			}
+			else
+			{
+				//if there is nothing just skip it
+			}
+		}
+	}
+
+	for(auto beg = extracted_data.begin(); beg != extracted_data.end();++beg)
+		static_cast<map<string, SQLtype*>*>(data)->insert(*beg);
+	
+	return 0;
 }
 
 string SQLite3DataBaseTools::make_create_request(const map<string, SQLtype*>& data, const string& table_name)
@@ -87,4 +149,8 @@ string SQLite3DataBaseTools::make_insert_request(const map<string, SQLtype*>& da
 	request += ")";
 
 	return request;
+}
+string SQLite3DataBaseTools::make_select_request(const string& table_name)
+{
+	return "SELECT * FROM " + table_name;
 }
