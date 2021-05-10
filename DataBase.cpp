@@ -109,6 +109,12 @@ map<string, SQLtype*> DataBase::run_get_request(const string& request, function<
 
 string SQLite3DataBaseTools::make_create_request(const map<string, SQLtype*>& data, const string& table_name)
 {
+	/*
+		generates request to create table with name passed as second argument,
+		first element of hash table is field name and second one is is value,
+		anyway it's omitted, but it's used to set the correct data of field.
+	*/
+
 	string request = "CREATE TABLE "+table_name+"( ";
 
 	size_t counter = 0;
@@ -132,6 +138,11 @@ string SQLite3DataBaseTools::make_create_request(const map<string, SQLtype*>& da
 }
 string SQLite3DataBaseTools::make_insert_request(const map<string, SQLtype*>& data, const string& table_name)
 {
+	/*
+		generates request for inserting new values of table, passed as second argument.
+		First element of hash table is name of field, and second one is new value.
+	*/
+
 	string request = "INSERT INTO " + table_name + " (";
 
 	size_t counter = 0;
@@ -167,11 +178,20 @@ string SQLite3DataBaseTools::make_insert_request(const map<string, SQLtype*>& da
 }
 string SQLite3DataBaseTools::make_select_request(const string& table_name)
 {
+	/*
+		generate request, selecting exactly everything from table
+	*/
+
 	return "SELECT * FROM " + table_name;
 }
 string SQLite3DataBaseTools::make_select_request(const string& table_name,
 												 const vector<string>& fields)
 {
+	/*
+		generates request to select all fields, passed as second argument
+		from table passed as first argument.
+	*/
+
 	string request = "SELECT ";
 
 	auto counter = 0;
