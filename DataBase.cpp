@@ -31,6 +31,7 @@ bool DataBase::run_set_request(const string& request)
 	
 	return result == SQLITE_OK;
 }
+
 map<string, SQLtype*> DataBase::run_get_request(const string& request)
 {
 	map<string, SQLtype*>* data = new map<string, SQLtype*>();
@@ -41,6 +42,7 @@ map<string, SQLtype*> DataBase::run_get_request(const string& request)
 		this->error_message = error_message;
 	return *data;
 }
+
 int DataBase::get_request_callback(void* data, int argc, char** argv, char** azColName)
 {
 	map<string, SQLtype*> extracted_data;
@@ -181,4 +183,30 @@ string SQLite3DataBaseTools::make_select_request(const string& table_name,
 	}
 	request += "FROM " + table_name;
 	return request;
+}
+string SQLite3DataBaseTools::make_update_request(const map<string, SQLtype*>& fields_to_update,
+												 const string& table_name)
+{
+	/*
+		This function creates request to update table with passed name.
+		First argument represents hash table of field name and its new value.
+		It's only creates a request, if you need to change special field with
+		special value run DataBase method to `run_get_request` with specific predicat.
+		Yes, you won't get nothing, so check errors with `get_error_message` method.
+	*/
+
+	string begin_request = "UPDATE "+table_name +" ";
+	vector<string> requests;
+	for (auto field : fields_to_update)
+	{
+		string request = begin_request + field.first+" set " + type_to_string(field.second) + ";";
+		requests.push_back(request);
+	}
+
+	function<string(string a,string b)> add =
+		[&](string a, string b)
+	{
+		return a + b;
+	};
+	return Functools::reduce(requests, add);
 }

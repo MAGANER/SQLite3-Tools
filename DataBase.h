@@ -36,5 +36,7 @@ extern string make_insert_request(const map<string, SQLtype*>& data, const strin
 extern string make_select_request(const string& table_name);
 extern string make_select_request(const string& table_name,
 								  const vector<string>& fields);
+extern string make_update_request(const map<string,SQLtype*>& fields_to_update,
+								  const string& table_name);
 };
 
