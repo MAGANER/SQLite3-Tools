@@ -100,6 +100,6 @@ Let's see them closer.<br>
 
 SQLite3 has special data type system, so i created classes to represent them.<br>
 ```SQLtype``` is abstract class for all types, it's used to provide polymorphic functions.<br>
-So, in depths there are ```Primarykey``, ```Integer```, ```Real```, ```Boolean```, ```Text```.<br>
+So, in depths there are ```Primarykey```, ```Integer```, ```Real```, ```Boolean```, ```Text```.<br>
 
 Anyway, all you need is to understand what is SQLtype.<br>
