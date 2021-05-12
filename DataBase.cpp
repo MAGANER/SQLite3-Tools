@@ -93,8 +93,15 @@ int DataBase::get_request_callback(void* data, int argc, char** argv, char** azC
 	
 	return 0;
 }
-map<string, SQLtype*> DataBase::run_get_request(const string& request, function<bool(SQLtype*)>& predicat)
+map<string, SQLtype*> DataBase::run_get_request(const string& request, function<bool(string, SQLtype*)>& predicat)
 {
+	/*
+		this function gets request string and predicat.
+		predicat takes name of field and it's value.
+		so request processes every data matching to 
+		predicat.
+	*/
+
 	map<string, SQLtype*>* data = new map<string, SQLtype*>();
 	char* error_message = nullptr;
 	int ok = sqlite3_exec(db, request.c_str(), DataBase::get_request_callback, (void*)data, &error_message);
@@ -102,8 +109,13 @@ map<string, SQLtype*> DataBase::run_get_request(const string& request, function<
 	if (error_message != nullptr)
 		this->error_message = error_message;
 
-	map<string, SQLtype*> _data = *data;
-	return Functools::MapFP::filter(_data, predicat);
+	map<string, SQLtype*> result_data;
+	for (auto pair : *data)
+	{
+		bool pred_result = predicat(pair.first, pair.second);
+		if (pred_result)result_data[pair.first] = pair.second;
+	}
+	return result_data;
 }
 
 
@@ -229,4 +241,22 @@ string SQLite3DataBaseTools::make_update_request(const map<string, SQLtype*>& fi
 		return a + b;
 	};
 	return Functools::reduce(requests, add);
+}
+string SQLite3DataBaseTools::make_delete_request(const string& table_name,
+												 const map<string, SQLtype*>& fields_to_update)
+{
+	/*
+		deletes all `fields_to_update` from `table_name`
+		first element of fields map is name of field,
+		and the second one is value that should be erased.
+	*/
+
+	string common = "DELETE from " + table_name + " WHERE ";
+	string request;
+	for (auto pair : fields_to_update)
+	{
+		request += common + pair.first + " = " + type_to_string(pair.second)+";";
+	}
+
+	return request;
 }

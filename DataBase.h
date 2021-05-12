@@ -25,7 +25,7 @@ public:
 
 	bool run_set_request(const string& request);
 	map<string, SQLtype*> run_get_request(const string& request);
-	map<string, SQLtype*> run_get_request(const string& request,function<bool(SQLtype*)>& predicat);
+	map<string, SQLtype*> run_get_request(const string& request,function<bool(string, SQLtype*)>& predicat);
 private:
 	static int get_request_callback(void* data, int argc, char** argv, char** azColName);
 };
@@ -38,5 +38,7 @@ extern string make_select_request(const string& table_name,
 								  const vector<string>& fields);
 extern string make_update_request(const map<string,SQLtype*>& fields_to_update,
 								  const string& table_name);
+extern string make_delete_request(const string& table_name,
+								  const map<string, SQLtype*>& fields_to_update);
 };
 
