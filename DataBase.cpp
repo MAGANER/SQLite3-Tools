@@ -32,21 +32,21 @@ bool DataBase::run_set_request(const string& request)
 	return result == SQLITE_OK;
 }
 
-map<string, SQLtype*> DataBase::run_get_request(const string& request)
+vector<chunk> DataBase::run_get_request(const string& request)
 {
-	map<string, SQLtype*>* data = new map<string, SQLtype*>();
+	vector<chunk>* data = new vector<chunk>();
 	char* error_message = nullptr;
 	int ok = sqlite3_exec(db, request.c_str(), DataBase::get_request_callback, (void*)data, &error_message);
 
 	if (error_message != nullptr)
 		this->error_message = error_message;
+
 	return *data;
 }
 
 int DataBase::get_request_callback(void* data, int argc, char** argv, char** azColName)
 {
 	map<string, SQLtype*> extracted_data;
-
 	for (int i = 0; i < argc; ++i)
 	{
 		function<char(char)> to_lower = tolower;
@@ -86,14 +86,14 @@ int DataBase::get_request_callback(void* data, int argc, char** argv, char** azC
 				//if there is nothing just skip it
 			}
 		}
-	}
 
-	for(auto beg = extracted_data.begin(); beg != extracted_data.end();++beg)
-		static_cast<map<string, SQLtype*>*>(data)->insert(*beg);
+		static_cast<vector<chunk>*>(data)->push_back(extracted_data);
+		extracted_data.clear();
+	}
 	
 	return 0;
 }
-map<string, SQLtype*> DataBase::run_get_request(const string& request, function<bool(string, SQLtype*)>& predicat)
+vector<chunk> DataBase::run_get_request(const string& request, function<bool(string, SQLtype*)>& predicat)
 {
 	/*
 		this function gets request string and predicat.
@@ -101,21 +101,31 @@ map<string, SQLtype*> DataBase::run_get_request(const string& request, function<
 		so request processes every data matching to 
 		predicat.
 	*/
-
-	map<string, SQLtype*>* data = new map<string, SQLtype*>();
+	
+	vector<chunk>* data = new vector<chunk>();
 	char* error_message = nullptr;
 	int ok = sqlite3_exec(db, request.c_str(), DataBase::get_request_callback, (void*)data, &error_message);
 
 	if (error_message != nullptr)
 		this->error_message = error_message;
 
-	map<string, SQLtype*> result_data;
-	for (auto pair : *data)
+
+	vector<chunk>* result = new vector<chunk>();
+	for (auto _chunk : *data)
 	{
-		bool pred_result = predicat(pair.first, pair.second);
-		if (pred_result)result_data[pair.first] = pair.second;
+		chunk curr;
+		for (auto pair : _chunk)
+		{
+			bool pred_result = predicat(pair.first, pair.second);
+			if (pred_result)
+			{
+				curr[pair.first] = pair.second;
+			}
+		}
+		result->push_back(curr);
 	}
-	return result_data;
+
+	return *result;
 }
 
 
