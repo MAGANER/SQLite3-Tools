@@ -38,9 +38,16 @@ They can be correct or incorrect, but GET requests always return something.<br>
 There are 3 functions to run requests:
 ```c++
 bool run_set_request(const string& request);
-map<string, SQLtype*> run_get_request(const string& request);
-map<string, SQLtype*> run_get_request(const string& request,function<bool(string, SQLtype*)>& predicat);
+vector<chunk> run_get_request(const string& request);
+vector<chunk> run_get_request(const string& request,function<bool(string, SQLtype*)>& predicat);
+//chunk is typedef map<string, SQLtype*> chunk;
 ```
+### A little bit about chunks
+So, imagine there are 4 rows and their common view is (ID, NUMBER)<br>
+when we get data from data base we will have array of pairs, obviosly,<br>
+we can get more than pair, but all of them will be called chunk.<br>
+
+
 These are public function of DataBase class. First of all, let's see at run_get_request<br>
 As all request runners it gets request as ```std::string```, also it returns boolean value.<br>
 If it's true, then everthing worked ok.<br>
