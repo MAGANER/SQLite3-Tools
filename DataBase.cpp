@@ -41,6 +41,8 @@ vector<chunk> DataBase::run_get_request(const string& request)
 	if (error_message != nullptr)
 		this->error_message = error_message;
 
+
+	data->erase(--data->end());//last element is junk
 	return *data;
 }
 
@@ -108,7 +110,7 @@ vector<chunk> DataBase::run_get_request(const string& request, function<bool(str
 
 	if (error_message != nullptr)
 		this->error_message = error_message;
-
+	data->erase(--data->end()); //last element is junk
 
 	vector<chunk>* result = new vector<chunk>();
 	for (auto _chunk : *data)
@@ -187,7 +189,7 @@ string SQLite3DataBaseTools::make_insert_request(const map<string, SQLtype*>& da
 		break;
 		case SQL_TYPES::INTEGER: request += to_string(static_cast<Integer*>(type_ptr)->value); break;
 		case SQL_TYPES::REAL:    request += to_string(static_cast<Real*>(type_ptr)->value);    break;
-		case SQL_TYPES::TEXT:    request += "'"+static_cast<Text*>(type_ptr)->value+"'";               break;
+		case SQL_TYPES::TEXT:    request += "\""+static_cast<Text*>(type_ptr)->value+"\"";               break;
 		case SQL_TYPES::BOOLEAN: request += to_string(static_cast<Boolean*>(type_ptr)->value); break;
 		}
 
