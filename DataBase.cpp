@@ -1,9 +1,19 @@
 #include "DataBase.h"
 using namespace SQLite3DataBaseTools;
 
-DataBase::DataBase(const string& path)
+DataBase::DataBase(const string& path, const string& key,bool first_time)
 {
 	ok = sqlite3_open(path.c_str(), &db);
+	const void* _key = key.c_str();
+
+	if (first_time)
+		sqlite3_rekey(db, _key, sizeof(_key));
+	if (!first_time)
+		if (sqlite3_key(db, _key, sizeof(_key)) != SQLITE_OK)
+		{
+			correct_password = false;
+		}
+		else correct_password = true;
 	if (!ok) error_message = sqlite3_errmsg(db);
 }
 DataBase::~DataBase()
@@ -243,7 +253,7 @@ string SQLite3DataBaseTools::make_update_request(const map<string, SQLtype*>& fi
 	vector<string> requests;
 	for (auto field : fields_to_update)
 	{
-		string request = begin_request + field.first+" set " + type_to_string(field.second) + ";";
+		string request = begin_request + " set " + field.first+" " + type_to_string(field.second) + ";";
 		requests.push_back(request);
 	}
 
