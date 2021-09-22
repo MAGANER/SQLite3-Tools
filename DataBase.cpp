@@ -277,7 +277,9 @@ string SQLite3DataBaseTools::make_delete_request(const string& table_name,
 	string request;
 	for (auto pair : fields_to_update)
 	{
-		request += common + pair.first + " = " + type_to_string(pair.second)+";";
+		auto _val = type_to_string(pair.second);
+		auto val = pair.second->type == SQL_TYPES::TEXT ? "'" + _val + "'" : _val;
+		request += common + pair.first + " = " + val+";";
 	}
 
 	return request;
